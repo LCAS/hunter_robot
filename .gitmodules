@@ -1,0 +1,3 @@
+[submodule "hunter_system"]
+	path = hunter_system
+	url = https://github.com/LCAS/hunter_ros2.git
