@@ -1,0 +1,9 @@
+<library path="hunter_description">
+  <class name="hunter_description/CarlikeBotSystemHardware"
+         type="hunter_description::CarlikeBotSystemHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      The ros2_control CarlikeBot using a system hardware interface-type. It uses velocity and position command and state interface for the drive motor and position command and state interface for the steering.
+    </description>
+  </class>
+</library>
