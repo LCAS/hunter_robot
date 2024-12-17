@@ -1,210 +1,104 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
-<xacro:macro name="dogbot" params="prefix">
-    <xacro:property name="chassis_xyz" value="-0.016 -0.01 0.1025"/>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <!-- BASE LINK -->
+  <!-- Include the inertial values from the following -->
+  <xacro:include filename="inertial_macros.xacro"/> 
+  <xacro:include filename="meshes.xacro"/> 
 
-    <link name="base_link">
-        
-    </link>
+  <!-- Constants for robot dimensions -->
+  <xacro:property name="z_base_to_wheel" value="-0.19558" />
+  <xacro:property name="x_base_to_rear" value="-0.28" />
+  <xacro:property name="x_base_to_front" value="0.37142" />
+  <xacro:property name="y_base_to_wheel" value="0.2925" />
+  <xacro:property name="max_steer_angle_central" value="0.461" />
 
-    <!-- CHASSIS LINK -->
+  <link name="base_link"/>
 
-    <joint name="chassis_joint" type="fixed">
-        <parent link="base_link"/>
-        <child link="chassis"/>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-    </joint>
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin rpy="0 0 0" xyz="0 0 0.37"/>
+  </joint>
 
-    <link name="chassis">
-        <visual>
-            <origin xyz="${chassis_xyz}" rpy="0 0 0"/> 
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/chassis.dae" />
-            </geometry>
-            <material name="chassis">
-                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
-            </material>
-        </visual>
+  <link name="chassis">
+    <xacro:mesh name="chassis"/>
+    <xacro:inertial_chassis/>
+  </link>
 
-        <collision>
-            <origin xyz="${chassis_xyz}" rpy="0 0 0"/> 
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/chassis.dae" />
-            </geometry>
-        </collision>
+  <link name="rear_left_wheel">
+    <xacro:mesh name="rear_left_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="chassis"/>
+    <child link="rear_left_wheel"/> 
+    <origin xyz="${x_base_to_rear} ${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
+    <axis xyz="0 0 -1" />
+    <dynamics damping="0.2" friction="15"/> 
+    <limit effort="10.0" velocity="10.0"/>
+  </joint>
 
-        <inertial>
-            <origin xyz="${chassis_xyz}" rpy="0 0 0"/>  
-            <mass value="24.7" />
-            <inertia ixx="0.123215829336501" ixy="-2.51201031615063E-06" ixz="0.00480100638469038" iyy="0.219144715482931" iyz="-1.0329581476775E-0" izz="0.313606030126045" />
-        </inertial>
-    </link>
+  <link name="rear_right_wheel">
+    <xacro:mesh name="rear_right_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="chassis"/>
+    <child link="rear_right_wheel"/> 
+    <origin xyz="${x_base_to_rear} -${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
+    <axis xyz="0 0 -1"/>
+    <dynamics damping="0.2" friction="15"/> 
+    <limit effort="10.0" velocity="10.0"/>
+    <mimic joint="rear_left_wheel_joint" multiplier="1.0" offset="0.0"/>
+  </joint>
 
-    <gazebo reference="chassis">
-        <material>Gazebo/Grey</material>
-    </gazebo>
+  <link name="front_left_steering_link">
+    <xacro:virtual/>
+    <xacro:inertial_steering_link/>
+  </link>
+  <joint name="front_left_steering_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="front_left_steering_link"/> 
+    <origin xyz="${x_base_to_front} ${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
+    <axis   xyz="0 1 0" />
+    <limit  lower="-${max_steer_angle_central}"  upper="${max_steer_angle_central}"  effort="10.0"  velocity="1" />
+    <dynamics damping="0.2"/>
+  </joint>
 
-    <!-- FRONT RIGHT WHEEL LINK -->
+  <link name="front_left_wheel">
+    <xacro:mesh name="front_left_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="front_left_steering_link"/>
+    <child link="front_left_wheel"/> 
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis   xyz="0 0 -1" />
+  </joint>
 
-    <joint name="front_right_wheel_joint" type="continuous">
-        <parent link="base_link"/>
-        <child link="front_right_wheel"/> 
-        <origin xyz="0.215 0.263 0.096" rpy="${-pi/2} 0 0" />
-        <axis xyz="0.0 0.0 1.0"/>
-        <!-- <dynamics damping="0.02" friction="0.02" /> -->
-    </joint>
+  <link name="front_right_steering_link">
+    <xacro:virtual/>
+    <xacro:inertial_steering_link/>
+  </link>
+  <joint name="front_right_steering_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="front_right_steering_link"/> 
+    <origin xyz="${x_base_to_front}  -${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
+    <axis   xyz="0 1 0" />
+    <limit  lower="-${max_steer_angle_central}"  upper="${max_steer_angle_central}"  effort="10.0"  velocity="1" />
+    <dynamics damping="0.2"/>
+    <mimic joint="front_left_steering_joint" multiplier="1.0" offset="0.0"/>
+  </joint>
+  
+  <link name="front_right_wheel">
+    <xacro:mesh name="front_right_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="front_right_steering_link"/>
+    <child link="front_right_wheel"/> 
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis   xyz="0 0 -1" />
+  </joint>
 
-    <link name="front_right_wheel">
-        <visual>
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry>
-            <material name="wheel">
-                <color rgba="0.0 0.0 0.0 1" />
-            </material>            
-        </visual>
-        <collision>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry> 
-        </collision>
-        <inertial>
-            <origin xyz="0.00027498198567355 3.24801296969213E-11 -0.0163540222836661" rpy="0 0 0" />
-            <mass value="3.149" />
-            <inertia ixx="0.0222" ixy="0.0" ixz="0.0" iyy="0.0222" iyz="0.0" izz="0.0378075" />
-        </inertial>
-    </link>
-
-    <gazebo reference="front_right_wheel">
-        <material>Gazebo/DarkGrey</material>
-    </gazebo>
-
-
-
-
-
-    <!-- FRONT LEFT WHEEL LINK -->
-
-    <joint name="front_left_wheel_joint" type="continuous">
-        <parent link="base_link"/>
-        <child link="front_left_wheel"/> 
-        <origin xyz="0.34058 0.24619 -0.1535" rpy="${-pi/2} 0 0" />
-        <axis xyz="0.0 0.0 1.0"/>
-        <!-- <dynamics damping="0.02" friction="0.02" /> -->
-    </joint>
-
-    <link name="front_left_wheel">
-        <visual>
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry>
-            <material name="wheel">
-                <color rgba="0.0 0.0 0.0 1" />
-            </material>            
-        </visual>
-        <collision>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry>
-        </collision>
-        <inertial>
-            <origin xyz="-3.5837499634539E-10 4.97346158701006E-09 -0.016356334080185" rpy="0 0 0" />
-            <mass value="3.149" />
-            <inertia ixx="0.0222" ixy="0.0" ixz="0.0" iyy="0.0222" iyz="0.0" izz="0.0378075" />
-        </inertial>
-        
-    </link>
-
-    <gazebo reference="front_left_wheel">
-        <material>Gazebo/DarkGrey</material>
-    </gazebo>
-
-
-
-
-
-
-    <!-- BACK RIGHT WHEEL LINK -->
-
-    <joint name="back_right_wheel_joint" type="continuous">
-        <parent link="base_link"/>
-        <child link="back_right_wheel"/> 
-        <origin xyz="-0.2078 -0.252 -0.158" rpy="${-pi/2} 0 0" />
-        <axis xyz="0.0 0.0 1.0"/>
-        <!-- <dynamics damping="0.02" friction="0.02" /> -->
-        <!-- <mimic joint="front_right_wheel_joint" multiplier="1" offset="0" /> -->
-    </joint>
-
-    <link name="back_right_wheel">
-        <visual>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry>
-            <material name="wheel">
-                <color rgba="0.0 0.0 0.0 1" />
-            </material>            
-        </visual>
-        <collision>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry>            
-        </collision>
-        <inertial>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <mass value="1" />
-            <inertia ixx="0.0222" ixy="0.0" ixz="0.0" iyy="0.0222" iyz="0.0" izz="0.037807" />
-        </inertial>
-    </link>
-
-    <gazebo reference="back_right_wheel">
-        <material>Gazebo/DarkGrey</material>
-    </gazebo>
-
-    <!-- BACK LEFT WHEEL LINK -->
-
-    <joint name="back_left_wheel_joint" type="continuous">
-        <parent link="base_link"/>
-        <child link="back_left_wheel"/> 
-        <origin xyz="-0.2078 0.252 -0.158" rpy="${-pi/2} 0 0" />
-        <axis xyz="0.0 0.0 1.0"/>
-        <!-- <dynamics damping="0.02" friction="0.02" /> -->
-        <!-- <mimic joint="front_left_wheel_joint" multiplier="1" offset="0" /> -->
-    </joint>
-
-    <link name="back_left_wheel">
-        <visual>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry>
-            <material name="wheel">
-                <color rgba="0.0 0.0 0.0 1" />
-            </material>            
-        </visual>
-        <collision>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="file://$(find hunter_description)/meshes/wheel.dae" />
-            </geometry>            
-        </collision>
-        <inertial>
-            <origin xyz="0 0 -0.03" rpy="0 0 0" />
-            <mass value="3.149" />
-            <inertia ixx="0.0222" ixy="0.0" ixz="0.0" iyy="0.0222" iyz="0.0" izz="0.0378075" />
-        </inertial>
-    </link>
-
-    <gazebo reference="back_left_wheel">
-        <material>Gazebo/DarkGrey</material>
-    </gazebo>
-    </xacro:macro>
 </robot>
-

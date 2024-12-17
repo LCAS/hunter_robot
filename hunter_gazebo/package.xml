@@ -2,12 +2,13 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>hunter_gazebo</name>
-  <version>0.0.1</version>
-  <description>TODO: Package description</description>
-  <maintainer email="ihroob@lincoln.ac.uk">ibrahim</maintainer>
+  <version>0.0.2</version>
+  <description>Gazebo package for hunter robot</description>
+  <maintainer email="ihroob@lincoln.ac.uk">Ibrahim Hroob</maintainer>
   <maintainer email="hari20002010@gmail.com">Hariharan Arunachalam</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache-2.0</license>
   <author email="hari20002010@gmail.com">Hariharan Arunachalam</author>
+  <author email="ihroob@lincoln.ac.uk">Ibrahim Hroob</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
