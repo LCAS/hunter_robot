@@ -31,25 +31,32 @@ Key differences in the Gazebo Sim launch file:
 
 ### 3. URDF/Xacro (hunter_description/description/ros2_control.xacro)
 
-Added Gazebo Sim plugin while keeping the Gazebo Classic plugin:
+Added conditional plugin loading using xacro arguments to prevent both plugins from loading simultaneously:
 
 ```xml
-<!-- Gazebo Classic plugin -->
-<gazebo>
-  <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-    <parameters>$(find-pkg-share hunter_description)/config/ackermann_like_controller.yaml</parameters>
-  </plugin>
-</gazebo>
+<!-- Argument to select simulator type: 'classic' or 'sim' (default: classic) -->
+<xacro:arg name="sim_gazebo" default="classic"/>
 
-<!-- Gazebo Sim (Ignition/Gz) plugin -->
-<gazebo>
-  <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-    <parameters>$(find-pkg-share hunter_description)/config/ackermann_like_controller.yaml</parameters>
-  </plugin>
-</gazebo>
+<!-- Gazebo Classic plugin - loaded when sim_gazebo:=classic -->
+<xacro:if value="$(arg sim_gazebo == 'classic')">
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find-pkg-share hunter_description)/config/ackermann_like_controller.yaml</parameters>
+    </plugin>
+  </gazebo>
+</xacro:if>
+
+<!-- Gazebo Sim plugin - loaded when sim_gazebo:=sim -->
+<xacro:if value="$(arg sim_gazebo == 'sim')">
+  <gazebo>
+    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find-pkg-share hunter_description)/config/ackermann_like_controller.yaml</parameters>
+    </plugin>
+  </gazebo>
+</xacro:if>
 ```
 
-Also updated the parameter path syntax from `$(find ...)` (ROS1 style) to `$(find-pkg-share ...)` (ROS2 style).
+The launch files pass the appropriate `sim_gazebo` argument to ensure only the correct plugin is loaded for each simulator. Also updated the parameter path syntax from `$(find ...)` (ROS1 style) to `$(find-pkg-share ...)` (ROS2 style).
 
 ## Usage
 
@@ -106,12 +113,21 @@ bridge = Node(
 )
 ```
 
+### Plugin Selection
+
+The URDF uses xacro conditional logic to load only one plugin at a time based on the `sim_gazebo` argument:
+- `sim_gazebo:=classic` (default) loads `libgazebo_ros2_control.so` for Gazebo Classic
+- `sim_gazebo:=sim` loads `libgz_ros2_control-system.so` for Gazebo Sim
+
+This prevents both plugins from attempting to load simultaneously.
+
 ## Backward Compatibility
 
 All changes maintain backward compatibility:
 - Original Gazebo Classic launch file remains unchanged
-- Both Gazebo plugins are present in the URDF
+- Only the appropriate plugin loads based on which simulator is running (controlled by xacro argument)
 - Original dependencies are kept alongside new ones
+- Default behavior (when no argument is passed) is Gazebo Classic
 
 ## Testing
 

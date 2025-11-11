@@ -40,7 +40,7 @@ def generate_launch_description():
     hunter_description_path = os.path.join(
         get_package_share_directory('hunter_description'))
 
-    # Get URDF via xacro
+    # Get URDF via xacro with sim_gazebo argument set to 'sim'
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
@@ -48,6 +48,8 @@ def generate_launch_description():
             PathJoinSubstitution(
                 [FindPackageShare("hunter_description"), "description", 'robot.urdf.xacro']
             ),
+            " ",
+            "sim_gazebo:=sim",
         ]
     )
     robot_description = {
