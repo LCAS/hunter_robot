@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <!-- Argument to select simulator type: 'classic' or 'sim' (default: classic for backward compatibility) -->
+  <xacro:arg name="sim_gazebo" default="classic"/>
+
   <ros2_control name="GazeboSystem" type="system">
     <hardware>
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
@@ -38,10 +41,23 @@
     </joint>
     
   </ros2_control>
-  <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <parameters>$(find hunter_description)/config/ackermann_like_controller.yaml</parameters>
-    </plugin>
-  </gazebo>
+
+  <!-- Gazebo Classic plugin -->
+  <xacro:if value="$(arg sim_gazebo == 'classic')">
+    <gazebo>
+      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+        <parameters>$(find-pkg-share hunter_description)/config/ackermann_like_controller.yaml</parameters>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+
+  <!-- Gazebo Sim (Ignition/Gz) plugin -->
+  <xacro:if value="$(arg sim_gazebo == 'sim')">
+    <gazebo>
+      <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(find-pkg-share hunter_description)/config/ackermann_like_controller.yaml</parameters>
+      </plugin>
+    </gazebo>
+  </xacro:if>
 
 </robot>
