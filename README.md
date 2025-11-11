@@ -74,7 +74,17 @@ This launch file starts Rviz and loads the Hunter V2 model.
 
 ### 2. Simulate the Robot in Gazebo
 
-To load the Hunter V2 in a Gazebo simulation environment:
+#### Option A: Gazebo Sim (Recommended for new installations)
+
+To load the Hunter V2 in Gazebo Sim (formerly Ignition Gazebo):
+
+```bash
+ros2 launch hunter_gazebo launch_gz_sim.launch.py
+```
+
+#### Option B: Gazebo Classic (Legacy)
+
+To load the Hunter V2 in Gazebo Classic:
 
 ```bash
 ros2 launch hunter_gazebo launch_sim.launch.py
