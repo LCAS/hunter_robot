@@ -25,13 +25,11 @@ def generate_launch_description():
     # Launch configuration for use_sim_time
     use_sim_time_config = LaunchConfiguration('use_sim_time')
 
-    gazebo_params_file = os.path.join(get_package_share_directory("hunter_gazebo"), 'config', 'gazebo_params.yaml')
-
-    # Include the Gazebo launch file, provided by the gazebo_ros package
+    # Include Gazebo Sim, provided by ros_gz_sim.
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
-        launch_arguments={'extra_gazebo_args': '--ros-args --params-file ' + gazebo_params_file}.items()
+            get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]),
+        launch_arguments={'gz_args': '-r -v 4 empty.sdf'}.items()
     )
 
     hunter_description_path = os.path.join(
@@ -59,11 +57,18 @@ def generate_launch_description():
     )
 
     spawn_entity = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
-        arguments=['-topic', 'robot_description', '-entity', 'hunter'],
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-topic', 'robot_description', '-name', 'hunter'],
         output='screen',
         parameters=[{'use_sim_time': use_sim_time_config}]
+    )
+
+    clock_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen',
     )
 
     load_joint_state_broadcaster = ExecuteProcess(
@@ -72,9 +77,9 @@ def generate_launch_description():
         output='screen'
     )
 
-    load_tricycle_controller = ExecuteProcess(
+    load_ackermann_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-             'ackermann_like_controller'],
+             'ackermann_controller'],
         output='screen'
     )
 
@@ -100,10 +105,11 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=load_joint_state_broadcaster,
-                on_exit=[load_tricycle_controller],
+                on_exit=[load_ackermann_controller],
             )
         ),
         gazebo,
+        clock_bridge,
         rviz,
         node_robot_state_publisher,
         spawn_entity,
