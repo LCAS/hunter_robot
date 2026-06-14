@@ -11,7 +11,21 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/> 
       <geometry>
-        <mesh filename="file://$(find hunter_description)/meshes/${name}.dae" />
+        <xacro:if value="${name == 'chassis'}">
+          <box size="0.90 0.60 0.30"/>
+        </xacro:if>
+        <xacro:if value="${name == 'rear_left_wheel'}">
+          <cylinder length="0.07" radius="0.165"/>
+        </xacro:if>
+        <xacro:if value="${name == 'rear_right_wheel'}">
+          <cylinder length="0.07" radius="0.165"/>
+        </xacro:if>
+        <xacro:if value="${name == 'front_left_wheel'}">
+          <cylinder length="0.07" radius="0.165"/>
+        </xacro:if>
+        <xacro:if value="${name == 'front_right_wheel'}">
+          <cylinder length="0.07" radius="0.165"/>
+        </xacro:if>
       </geometry>
     </collision>
   </xacro:macro>

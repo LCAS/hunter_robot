@@ -1,10 +1,22 @@
+# ---------------------------------------------------------------------------
+# ros2_control configuration for the Hunter (Ackermann) robot - ROS 2 Jazzy.
+#
+# The robot has TWO steerable front wheels and TWO driven rear wheels, which is
+# exactly the kinematic model of ros2_controllers' AckermannSteeringController
+# (two steering joints + two traction joints). That controller is used here.
+#
+# CLEANUP NOTE:
+#   The previous version of this file also defined `ackermann_like_controller`
+#   (tricycle_controller/TricycleController). The tricycle model assumes ONE
+#   steering + ONE drive joint, which does not match this 4-wheel chassis, and
+#   nothing in the launch files loaded it. It has been removed to avoid an
+#   incorrect, unused controller. JointStateBroadcaster + AckermannSteering
+#   are the only controllers actually loaded by the sim/bringup launch files.
+# ---------------------------------------------------------------------------
 controller_manager:
   ros__parameters:
     update_rate: 50 # Hz
     use_sim_time: true
-
-    ackermann_like_controller:
-      type: tricycle_controller/TricycleController
 
     ackermann_controller:
       type: ackermann_steering_controller/AckermannSteeringController
@@ -14,66 +26,37 @@ controller_manager:
 
 joint_state_broadcaster:
   ros__parameters:
+    # The front road wheels are passive (no command interface), so the
+    # broadcaster must be told to publish their state explicitly.
     extra_joints: ["front_left_wheel_joint", "front_right_wheel_joint"]
-    # extra_joints: ["front_left_wheel_joint", "front_right_wheel_joint", "rear_right_wheel_joint"]
-
-
-ackermann_like_controller:
-  ros__parameters:
-    # Model
-    traction_joint_name: rear_left_wheel_joint # Name of traction joint in URDF
-    steering_joint_name: front_left_steering_joint # Name of steering joint in URDF
-    wheel_radius: 0.165 # Radius of front wheel
-    wheelbase: 0.65 # Distance between center of back wheels and front wheel
-
-    # Odometry
-    odom_frame_id: odom
-    base_frame_id: base_link
-    publish_rate: 50.0 # publish rate of odom and tf
-    open_loop: false # if True, uses cmd_vel instead of hardware interface feedback to compute odometry
-    enable_odom_tf: false # If True, publishes odom<-base_link TF
-    odom_only_twist: false # If True, publishes on /odom only linear.x and angular.z; Useful for computing odometry in another node, e.g robot_localization's ekf
-    pose_covariance_diagonal: [0.0, 7.0, 14.0, 21.0, 28.0, 35.0] # Need to be set if fusing odom with other localization source
-    twist_covariance_diagonal: [0.0, 7.0, 14.0, 21.0, 28.0, 35.0] # Need to be set if fusing odom with other localization source
-    velocity_rolling_window_size: 10 # Rolling window size of rcppmath::RollingMeanAccumulator applied on linear and angular speeds published on odom
-
-    # Rate Limiting
-    traction: # All values should be positive
-      # min_velocity: 0.0
-      # max_velocity: 10.0
-      # min_acceleration: 0.0
-      max_acceleration: 5.0
-      # min_deceleration: 0.0
-      max_deceleration: 8.0
-      # min_jerk: 0.0
-      # max_jerk: 10.0
-    steering:
-      min_position: -0.461
-      max_position: 0.461
-      # min_velocity: 0.0
-      max_velocity: 1.0
-      # min_acceleration: 0.0
-      # max_acceleration: 10.0
-
-    # cmd_vel input
-    cmd_vel_timeout: 500 # In milliseconds. Timeout to stop if no cmd_vel is received
-    use_stamped_vel: false # Set to True if using TwistStamped.
-
-    # Debug
-    publish_ackermann_command: true # Publishes AckermannDrive. The speed does not comply to the msg definition, it the wheel angular speed in rad/s.
 
 ackermann_controller:
   ros__parameters:
     reference_timeout: 2.0
+    # front_steering=true: the steered axle is the front one.
     front_steering: true
     open_loop: false
     velocity_rolling_window_size: 10
+    # position_feedback=false -> traction state is read as velocity (rad/s),
+    # which matches the rear wheel <state_interface name="velocity"/> in
+    # ros2_control.xacro.
     position_feedback: false
-    rear_wheels_names: [rear_right_wheel_joint, rear_left_wheel_joint]
-    front_wheels_names: [front_right_steering_joint, front_left_steering_joint]
 
-    wheelbase: 0.65
-    front_wheel_track: 0.605
-    rear_wheel_track: 0.605
-    front_wheels_radius: 0.165
-    rear_wheels_radius: 0.165
+    # Joint name order for 2-steer/2-traction kinematics is [right, left]
+    # (per the steering_controllers_library spec). These names match the
+    # joints declared in hunter_description/description/ros2_control.xacro.
+    traction_joints_names: [rear_right_wheel_joint, rear_left_wheel_joint]
+    steering_joints_names: [front_right_steering_joint, front_left_steering_joint]
+
+    # Geometry (metres).
+    wheelbase: 0.65              # rear axle <-> front axle distance
+    traction_track_width: 0.605  # rear wheel separation
+    steering_track_width: 0.605  # front wheel separation
+    traction_wheels_radius: 0.165
+
+    # Odometry / TF
+    base_frame_id: base_link
+    odom_frame_id: odom
+    enable_odom_tf: false        # leave odom->base_link TF to robot_localization
+    pose_covariance_diagonal: [0.0, 7.0, 14.0, 21.0, 28.0, 35.0]
+    twist_covariance_diagonal: [0.0, 7.0, 14.0, 21.0, 28.0, 35.0]

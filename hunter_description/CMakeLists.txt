@@ -1,21 +1,23 @@
 cmake_minimum_required(VERSION 3.16)
-project(hunter_description LANGUAGES CXX)
+project(hunter_description)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-  add_compile_options(-Wall -Wextra)
-endif()
-
+# NOTE (Jazzy / new Gazebo cleanup):
+# This is a description-only package: it ships xacro/URDF, controller configs,
+# launch files, rviz and meshes. It contains NO C++ or Python source, so the
+# previous find_package() calls for rclcpp, rclcpp_action, control_msgs,
+# geometry_msgs, std_msgs and backward_ros (and the CXX language) were unused
+# build dependencies and have been removed. Only ament_cmake is required to
+# install the shared resources.
 find_package(ament_cmake REQUIRED)
-find_package(control_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(backward_ros REQUIRED)
 
 install(
   DIRECTORY description launch config rviz meshes
   DESTINATION share/${PROJECT_NAME}/
 )
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 ament_package()

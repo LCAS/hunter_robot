@@ -34,8 +34,8 @@
     <child link="rear_left_wheel"/> 
     <origin xyz="${x_base_to_rear} ${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
     <axis xyz="0 0 -1" />
-    <dynamics damping="0.2" friction="15"/> 
-    <limit effort="10.0" velocity="10.0"/>
+    <dynamics damping="0.01" friction="0.1"/> 
+    <limit effort="100.0" velocity="100.0"/>
   </joint>
   <xacro:gazebo_friction reference="rear_left_wheel"/>
 
@@ -48,8 +48,8 @@
     <child link="rear_right_wheel"/> 
     <origin xyz="${x_base_to_rear} -${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
     <axis xyz="0 0 -1"/>
-    <dynamics damping="0.2" friction="15"/> 
-    <limit effort="10.0" velocity="10.0"/>
+    <dynamics damping="0.01" friction="0.1"/> 
+    <limit effort="100.0" velocity="100.0"/>
     <!-- <mimic joint="rear_left_wheel_joint" multiplier="1.0" offset="0.0"/> -->
   </joint>
   <xacro:gazebo_friction reference="rear_right_wheel"/>

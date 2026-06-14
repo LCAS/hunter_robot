@@ -39,6 +39,7 @@
   <gazebo>
     <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find hunter_description)/config/ackermann_like_controller.yaml</parameters>
+      <parameters>$(find hunter_description)/config/gazebo_params.yaml</parameters>
     </plugin>
   </gazebo>
 

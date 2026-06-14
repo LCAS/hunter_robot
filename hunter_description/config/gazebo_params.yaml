@@ -1,0 +1,3 @@
+gz_ros_control:
+  ros__parameters:
+    position_proportional_gain: 100.0

@@ -20,7 +20,11 @@ Official Robot Website: [AgileX Hunter V2B](https://global.agilex.ai/products/hu
 ## Installation and Build Instructions
 
 ### Prerequisites
-Ensure you have a ROS 2 workspace set up. If not, create one:
+- **ROS 2 Jazzy**
+- **The new Gazebo (gz-sim, Harmonic)** with `ros_gz` (`ros_gz_sim`, `ros_gz_bridge`)
+- `gz_ros2_control` and `ros2_controllers` (provides `ackermann_steering_controller`)
+
+Set up a ROS 2 workspace if you don't have one:
 ```bash
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws
@@ -86,10 +90,15 @@ ros2 launch hunter_gazebo launch_sim.launch.py
 
 ### 3. Control the Robot with Teleop
 
-You can control the Hunter V2 using the `teleop_twist_keyboard` package. First, ensure the simulation is running, then execute:
+You can control the Hunter V2 using the `teleop_twist_keyboard` package. The
+`ackermann_steering_controller` listens for `geometry_msgs/TwistStamped` on its
+`~/reference` topic. First, ensure the simulation is running, then execute:
 
 ```bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args --remap cmd_vel:=/ackermann_like_controller/cmd_vel
+ros2 run teleop_twist_keyboard teleop_twist_keyboard \
+  --ros-args \
+  -p stamped:=true \
+  --remap /cmd_vel:=/ackermann_controller/reference
 ```
 
 Use the keyboard inputs to move the robot in the simulation.
@@ -118,13 +127,12 @@ This project is licensed under the **Apache License**. See the [LICENSE](LICENSE
 
 ## References
 
-For more details on ROS 2 Control and Gazebo integration, see:
+For more details on ROS 2 Control and the new Gazebo integration, see:
 
 - [ros2_controllers](https://github.com/ros-controls/ros2_controllers/tree/master)
-- [gazebo_ros2_control](https://github.com/ros-controls/gazebo_ros2_control)
-- [Getting Started with ros2_control](https://control.ros.org/humble/doc/getting_started/getting_started.html)
-- [ros2controlcli Documentation](https://control.ros.org/master/doc/ros2_control/ros2controlcli/doc/userdoc.html)
-- [gazebo_ros2_control User Guide](https://control.ros.org/rolling/doc/gazebo_ros2_control/doc/index.html)
-- [Video Tutorial](https://youtu.be/BcjHyhV0kIs?si=dUpg7IF-kHSUgB-w)
+- [ackermann_steering_controller](https://control.ros.org/jazzy/doc/ros2_controllers/ackermann_steering_controller/doc/userdoc.html)
+- [gz_ros2_control](https://control.ros.org/jazzy/doc/gz_ros2_control/doc/index.html)
+- [Getting Started with ros2_control](https://control.ros.org/jazzy/doc/getting_started/getting_started.html)
+- [ros_gz / ROS 2 + new Gazebo integration](https://github.com/gazebosim/ros_gz)
 
 ---

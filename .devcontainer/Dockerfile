@@ -1,4 +1,4 @@
-FROM lcas.lincoln.ac.uk/lcas/ros:humble as base
+FROM lcas.lincoln.ac.uk/lcas/ros:jazzy as base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -26,6 +26,6 @@ FROM depbuilder as final
 # add sudo without password
 RUN echo "ALL ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /etc/bash.bashrc
 
 USER ros

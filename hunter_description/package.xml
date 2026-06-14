@@ -3,10 +3,10 @@
 <package format="3">
   <name>hunter_description</name>
   <version>0.1.0</version>
-  <description>URDF Description package for hunter robot</description>
-  
+  <description>URDF Description package for the AgileX Hunter 2.0 robot</description>
+
   <maintainer email="ihroob@lincoln.ac.uk">Ibrahim Hroob</maintainer>
-  
+
   <author email="ihroob@lincoln.ac.uk">Ibrahim Hroob</author>
   <author email="hari20002010@gmail.com">Hariharan Arunachalam</author>
 
@@ -14,14 +14,18 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <depend>rclcpp_lifecycle</depend>
-
-  <exec_depend>tricycle_controller</exec_depend>
+  <!--
+    Runtime dependencies for an Ackermann robot description on ROS 2 Jazzy.
+    CLEANUP NOTES:
+      * Removed rclcpp / rclcpp_lifecycle: this is a resource-only package with
+        no C++ nodes, so they were never used.
+      * Removed tricycle_controller: the Hunter 2.0 has two steered front wheels
+        and two driven rear wheels, which is the Ackermann model. The active
+        controller is ackermann_steering_controller (shipped in ros2_controllers).
+  -->
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
   <exec_depend>joint_state_publisher_gui</exec_depend>
-<!--   <exec_depend>joint_state_controller</exec_depend> -->
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros2_control</exec_depend>
   <exec_depend>ros2_controllers</exec_depend>
@@ -31,10 +35,9 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>xacro</exec_depend>
 
-  <test_depend>ament_cmake_pytest</test_depend>
-  <test_depend>launch_testing_ros</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
   <test_depend>liburdfdom-tools</test_depend>
-<!--   <test_depend>ros2_control_demo_testing</test_depend> -->
   <test_depend>xacro</test_depend>
 
   <export>
